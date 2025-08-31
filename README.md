@@ -13,7 +13,9 @@ Select any running application from a dynamic list.
 
 Set a specific time (HH:MM:SS) for the action.
 
-Customize the message to be typed.Add multiple entries to a schedule queue.
+Customize the message to be typed.
+
+Add multiple entries to a schedule queue.
 
 Start and stop the automation engine at any time.
 
@@ -60,7 +62,9 @@ Set Alarm Message: In the dedicated alarm section, enter the text for your remin
 
 Set Alarm Time: Use the full date and time picker to set when the alarm should finish. 
 
-You can set this for days, weeks, or months in the future.Add Alarm: Click the "Add Alarm" button. 
+You can set this for days, weeks, or months in the future.
+
+Add Alarm: Click the "Add Alarm" button. 
 
 Your reminder will appear in the "Upcoming Alarms" list with a live countdown.
 
