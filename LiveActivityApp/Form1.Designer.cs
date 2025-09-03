@@ -39,7 +39,7 @@ namespace LiveActivityApp
             columnHeader1 = new ColumnHeader();
             columnHeader2 = new ColumnHeader();
             columnHeader3 = new ColumnHeader();
-            dateTimePicker1 = new DateTimePicker();
+            columnHeader6 = new ColumnHeader();
             dtpScheduleTime = new DateTimePicker();
             txtScheduleMessage = new TextBox();
             btnAddSchedule = new Button();
@@ -56,12 +56,20 @@ namespace LiveActivityApp
             dtpAlarmTime = new DateTimePicker();
             btnAddAlarm = new Button();
             btnDeleteAlarm = new Button();
+            cbAction = new ComboBox();
+            cbActionDelay = new ComboBox();
+            cbAction2 = new ComboBox();
+            label7 = new Label();
+            label8 = new Label();
+            label9 = new Label();
+            chkTrayMode = new CheckBox();
+            lblTrayMode = new Label();
             SuspendLayout();
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(541, 95);
+            label2.Location = new Point(541, 156);
             label2.Name = "label2";
             label2.Size = new Size(113, 15);
             label2.TabIndex = 2;
@@ -69,7 +77,7 @@ namespace LiveActivityApp
             // 
             // btnStart
             // 
-            btnStart.Location = new Point(374, 172);
+            btnStart.Location = new Point(374, 233);
             btnStart.Name = "btnStart";
             btnStart.Size = new Size(75, 23);
             btnStart.TabIndex = 6;
@@ -79,7 +87,7 @@ namespace LiveActivityApp
             // 
             // btnStop
             // 
-            btnStop.Location = new Point(695, 172);
+            btnStop.Location = new Point(695, 233);
             btnStop.Name = "btnStop";
             btnStop.Size = new Size(75, 23);
             btnStop.TabIndex = 7;
@@ -90,14 +98,14 @@ namespace LiveActivityApp
             // cmbWindowTitles
             // 
             cmbWindowTitles.FormattingEnabled = true;
-            cmbWindowTitles.Location = new Point(504, 122);
+            cmbWindowTitles.Location = new Point(504, 183);
             cmbWindowTitles.Name = "cmbWindowTitles";
             cmbWindowTitles.Size = new Size(181, 23);
             cmbWindowTitles.TabIndex = 8;
             // 
             // btnRefresh
             // 
-            btnRefresh.Location = new Point(695, 122);
+            btnRefresh.Location = new Point(695, 183);
             btnRefresh.Name = "btnRefresh";
             btnRefresh.Size = new Size(75, 23);
             btnRefresh.TabIndex = 10;
@@ -107,7 +115,7 @@ namespace LiveActivityApp
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(12, 64);
+            lblStatus.Location = new Point(11, 83);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(39, 15);
             lblStatus.TabIndex = 11;
@@ -115,10 +123,10 @@ namespace LiveActivityApp
             // 
             // lvSchedule
             // 
-            lvSchedule.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2, columnHeader3 });
-            lvSchedule.Location = new Point(374, 240);
+            lvSchedule.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2, columnHeader3, columnHeader6 });
+            lvSchedule.Location = new Point(374, 302);
             lvSchedule.Name = "lvSchedule";
-            lvSchedule.Size = new Size(396, 198);
+            lvSchedule.Size = new Size(396, 136);
             lvSchedule.TabIndex = 12;
             lvSchedule.UseCompatibleStateImageBehavior = false;
             lvSchedule.View = View.Details;
@@ -131,38 +139,37 @@ namespace LiveActivityApp
             // columnHeader2
             // 
             columnHeader2.Text = "Message";
-            columnHeader2.Width = 200;
+            columnHeader2.Width = 110;
             // 
             // columnHeader3
             // 
             columnHeader3.Text = "Target Window";
-            columnHeader3.Width = 142;
+            columnHeader3.Width = 100;
             // 
-            // dateTimePicker1
+            // columnHeader6
             // 
-            dateTimePicker1.Location = new Point(570, 27);
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(200, 23);
-            dateTimePicker1.TabIndex = 13;
+            columnHeader6.Text = "Logged Commands";
+            columnHeader6.Width = 132;
             // 
             // dtpScheduleTime
             // 
-            dtpScheduleTime.Format = DateTimePickerFormat.Time;
-            dtpScheduleTime.Location = new Point(570, 56);
+            dtpScheduleTime.CustomFormat = "dddd, MMMM d, yyyy h:mm:ss tt";
+            dtpScheduleTime.Format = DateTimePickerFormat.Custom;
+            dtpScheduleTime.Location = new Point(509, 72);
             dtpScheduleTime.Name = "dtpScheduleTime";
-            dtpScheduleTime.Size = new Size(200, 23);
-            dtpScheduleTime.TabIndex = 14;
+            dtpScheduleTime.Size = new Size(279, 23);
+            dtpScheduleTime.TabIndex = 13;
             // 
             // txtScheduleMessage
             // 
-            txtScheduleMessage.Location = new Point(259, 30);
+            txtScheduleMessage.Location = new Point(12, 30);
             txtScheduleMessage.Name = "txtScheduleMessage";
             txtScheduleMessage.Size = new Size(267, 23);
             txtScheduleMessage.TabIndex = 15;
             // 
             // btnAddSchedule
             // 
-            btnAddSchedule.Location = new Point(522, 172);
+            btnAddSchedule.Location = new Point(522, 233);
             btnAddSchedule.Name = "btnAddSchedule";
             btnAddSchedule.Size = new Size(132, 23);
             btnAddSchedule.TabIndex = 16;
@@ -171,7 +178,7 @@ namespace LiveActivityApp
             // 
             // btnDeleteSchedule
             // 
-            btnDeleteSchedule.Location = new Point(526, 211);
+            btnDeleteSchedule.Location = new Point(526, 272);
             btnDeleteSchedule.Name = "btnDeleteSchedule";
             btnDeleteSchedule.Size = new Size(128, 23);
             btnDeleteSchedule.TabIndex = 17;
@@ -181,7 +188,7 @@ namespace LiveActivityApp
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(338, 9);
+            label1.Location = new Point(13, 9);
             label1.Name = "label1";
             label1.Size = new Size(111, 15);
             label1.TabIndex = 18;
@@ -190,7 +197,7 @@ namespace LiveActivityApp
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(638, 9);
+            label3.Location = new Point(609, 50);
             label3.Name = "label3";
             label3.Size = new Size(93, 15);
             label3.TabIndex = 19;
@@ -200,9 +207,9 @@ namespace LiveActivityApp
             // lvAlarms
             // 
             lvAlarms.Columns.AddRange(new ColumnHeader[] { columnHeader4, columnHeader5 });
-            lvAlarms.Location = new Point(12, 240);
+            lvAlarms.Location = new Point(12, 302);
             lvAlarms.Name = "lvAlarms";
-            lvAlarms.Size = new Size(304, 198);
+            lvAlarms.Size = new Size(304, 136);
             lvAlarms.TabIndex = 20;
             lvAlarms.UseCompatibleStateImageBehavior = false;
             lvAlarms.View = View.Details;
@@ -220,7 +227,7 @@ namespace LiveActivityApp
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(91, 219);
+            label4.Location = new Point(91, 280);
             label4.Name = "label4";
             label4.Size = new Size(103, 15);
             label4.TabIndex = 21;
@@ -229,7 +236,7 @@ namespace LiveActivityApp
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(13, 95);
+            label5.Location = new Point(13, 156);
             label5.Name = "label5";
             label5.Size = new Size(88, 15);
             label5.TabIndex = 22;
@@ -237,7 +244,7 @@ namespace LiveActivityApp
             // 
             // txtAlarmMessage
             // 
-            txtAlarmMessage.Location = new Point(12, 113);
+            txtAlarmMessage.Location = new Point(12, 174);
             txtAlarmMessage.Name = "txtAlarmMessage";
             txtAlarmMessage.Size = new Size(303, 23);
             txtAlarmMessage.TabIndex = 23;
@@ -245,7 +252,7 @@ namespace LiveActivityApp
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(12, 139);
+            label6.Location = new Point(12, 200);
             label6.Name = "label6";
             label6.Size = new Size(69, 15);
             label6.TabIndex = 24;
@@ -255,14 +262,14 @@ namespace LiveActivityApp
             // 
             dtpAlarmTime.CustomFormat = "MM/dd/yyyy hh:mm tt";
             dtpAlarmTime.Format = DateTimePickerFormat.Custom;
-            dtpAlarmTime.Location = new Point(12, 157);
+            dtpAlarmTime.Location = new Point(12, 218);
             dtpAlarmTime.Name = "dtpAlarmTime";
             dtpAlarmTime.Size = new Size(200, 23);
             dtpAlarmTime.TabIndex = 25;
             // 
             // btnAddAlarm
             // 
-            btnAddAlarm.Location = new Point(12, 186);
+            btnAddAlarm.Location = new Point(12, 247);
             btnAddAlarm.Name = "btnAddAlarm";
             btnAddAlarm.Size = new Size(75, 23);
             btnAddAlarm.TabIndex = 26;
@@ -271,18 +278,105 @@ namespace LiveActivityApp
             // 
             // btnDeleteAlarm
             // 
-            btnDeleteAlarm.Location = new Point(102, 186);
+            btnDeleteAlarm.Location = new Point(102, 247);
             btnDeleteAlarm.Name = "btnDeleteAlarm";
             btnDeleteAlarm.Size = new Size(130, 23);
             btnDeleteAlarm.TabIndex = 27;
             btnDeleteAlarm.Text = "Delete Selected Alarm";
             btnDeleteAlarm.UseVisualStyleBackColor = true;
             // 
+            // cbAction
+            // 
+            cbAction.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbAction.FormattingEnabled = true;
+            cbAction.Location = new Point(297, 31);
+            cbAction.Name = "cbAction";
+            cbAction.Size = new Size(194, 23);
+            cbAction.TabIndex = 28;
+            cbAction.SelectedIndexChanged += cbAction_SelectedIndexChanged;
+            // 
+            // cbActionDelay
+            // 
+            cbActionDelay.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbActionDelay.FormattingEnabled = true;
+            cbActionDelay.Location = new Point(328, 119);
+            cbActionDelay.Name = "cbActionDelay";
+            cbActionDelay.Size = new Size(121, 23);
+            cbActionDelay.TabIndex = 29;
+            // 
+            // cbAction2
+            // 
+            cbAction2.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbAction2.FormattingEnabled = true;
+            cbAction2.Location = new Point(297, 75);
+            cbAction2.Name = "cbAction2";
+            cbAction2.Size = new Size(194, 23);
+            cbAction2.TabIndex = 30;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(336, 9);
+            label7.Name = "label7";
+            label7.Size = new Size(113, 15);
+            label7.TabIndex = 31;
+            label7.Text = "KEYBOARD ACTION";
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(336, 57);
+            label8.Name = "label8";
+            label8.Size = new Size(113, 15);
+            label8.TabIndex = 32;
+            label8.Text = "KEYBOARD ACTION";
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(350, 101);
+            label9.Name = "label9";
+            label9.Size = new Size(78, 15);
+            label9.TabIndex = 33;
+            label9.Text = "DELAY TIMER";
+            // 
+            // chkTrayMode
+            // 
+            chkTrayMode.Appearance = Appearance.Button;
+            chkTrayMode.BackColor = Color.Firebrick;
+            chkTrayMode.ForeColor = Color.White;
+            chkTrayMode.Location = new Point(738, 12);
+            chkTrayMode.Name = "chkTrayMode";
+            chkTrayMode.Size = new Size(50, 23);
+            chkTrayMode.TabIndex = 34;
+            chkTrayMode.Text = "OFF";
+            chkTrayMode.TextAlign = ContentAlignment.MiddleCenter;
+            chkTrayMode.UseVisualStyleBackColor = false;
+            chkTrayMode.CheckedChanged += chkTrayMode_CheckedChanged;
+            // 
+            // lblTrayMode
+            // 
+            lblTrayMode.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblTrayMode.AutoSize = true;
+            lblTrayMode.Location = new Point(669, 16);
+            lblTrayMode.Name = "lblTrayMode";
+            lblTrayMode.Size = new Size(63, 15);
+            lblTrayMode.TabIndex = 35;
+            lblTrayMode.Text = "Tray Mode";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(lblTrayMode);
+            Controls.Add(chkTrayMode);
+            Controls.Add(label9);
+            Controls.Add(label8);
+            Controls.Add(label7);
+            Controls.Add(cbAction2);
+            Controls.Add(cbActionDelay);
+            Controls.Add(cbAction);
             Controls.Add(btnDeleteAlarm);
             Controls.Add(btnAddAlarm);
             Controls.Add(dtpAlarmTime);
@@ -297,7 +391,6 @@ namespace LiveActivityApp
             Controls.Add(btnAddSchedule);
             Controls.Add(txtScheduleMessage);
             Controls.Add(dtpScheduleTime);
-            Controls.Add(dateTimePicker1);
             Controls.Add(lvSchedule);
             Controls.Add(lblStatus);
             Controls.Add(btnRefresh);
@@ -327,7 +420,6 @@ namespace LiveActivityApp
         private ColumnHeader columnHeader1;
         private ColumnHeader columnHeader2;
         private ColumnHeader columnHeader3;
-        private DateTimePicker dateTimePicker1;
         private DateTimePicker dtpScheduleTime;
         private TextBox txtScheduleMessage;
         private Button btnAddSchedule;
@@ -344,5 +436,14 @@ namespace LiveActivityApp
         private DateTimePicker dtpAlarmTime;
         private Button btnAddAlarm;
         private Button btnDeleteAlarm;
+        private ComboBox cbAction;
+        private ColumnHeader columnHeader6;
+        private ComboBox cbActionDelay;
+        private ComboBox cbAction2;
+        private Label label7;
+        private Label label8;
+        private Label label9;
+        private CheckBox chkTrayMode;
+        private Label lblTrayMode;
     }
 }
