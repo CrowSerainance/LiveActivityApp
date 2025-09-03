@@ -1,3 +1,18 @@
+Release notes (v0.1.1)
+
+Tray Mode & Inline Editor
+
+• New: Tray Mode with system tray icon. Close/minimize sends the app to tray; tray menu exposes Show, Start/Stop, Exit. The menu text updates automatically when you start/stop.
+
+• New: Inline schedule edit — double-click a row to change time, message, target window, two action tokens, and per-row delay.
+
+• Improved: Rich action tokens (ENTER, CTRL+ENTER, TAB, ALT+TAB, CTRL/ALT/SHIFT + A–Z) and optional 0.5–5.0 s delay between actions.
+
+• Improved: More robust key sending using SendInput with a safe SendKeys fallback.
+
+• UI: Single combined Date & Time picker for scheduling; cleaner run/stop state.
+
+
 # LiveActivityApp
 
 Alarm and Auto Tool
