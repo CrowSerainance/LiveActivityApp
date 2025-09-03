@@ -2,11 +2,17 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Alarm and Auto Tool</AssemblyName>
+    <StartupObject>LiveActivityApp.Program</StartupObject>
+    <ApplicationIcon>head-robot-icon-vector-illustration-260nw-769234693.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="head-robot-icon-vector-illustration-260nw-769234693.ico" />
+  </ItemGroup>
 
 </Project>
