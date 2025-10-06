@@ -1,3 +1,9 @@
+Release notes (v0.1.2)
+• New: Enabled additional commands while program is running.
+
+• New: Rebuffed switch tile window, commits fully to changing window as long as program is running as "Admin".
+
+
 Release notes (v0.1.1)
 
 Tray Mode & Inline Editor
