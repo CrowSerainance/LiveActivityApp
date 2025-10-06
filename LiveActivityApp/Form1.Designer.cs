@@ -115,7 +115,7 @@ namespace LiveActivityApp
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(11, 83);
+            lblStatus.Location = new Point(12, 101);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(39, 15);
             lblStatus.TabIndex = 11;
