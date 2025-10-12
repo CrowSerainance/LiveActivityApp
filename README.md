@@ -1,4 +1,6 @@
-Release notes (v0.1.2)
+Release notes (v0.1.3)
+• Rebuffed Alt+Tab command.
+
 • New: Enabled additional commands while program is running.
 
 • New: Rebuffed switch tile window, commits fully to changing window as long as program is running as "Admin".
