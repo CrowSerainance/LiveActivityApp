@@ -1327,6 +1327,15 @@ namespace LiveActivityApp
                         }
                     }
                 }
+                else if (t == "ALT+TAB")
+                {
+                    SendKeyVK(VK_MENU, false); // ALT down
+                    Thread.Sleep(5);
+                    if (!(SendKeyVK(VK_TAB, false) && SendKeyVK(VK_TAB, true)))
+                        try { SendKeys.SendWait("%{TAB}"); } catch { /* ignore */ }
+                    Thread.Sleep(5);
+                    SendKeyVK(VK_MENU, true);  // ALT up
+                }
                 else if (t.StartsWith("SHIFT+") || t.StartsWith("CTRL+") || t.StartsWith("ALT+"))
                 {
                     // Handle modifier+letter combinations (e.g., CTRL+C, SHIFT+A)
