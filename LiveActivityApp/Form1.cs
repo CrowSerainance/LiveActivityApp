@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace LiveActivityApp
 {
@@ -75,6 +77,18 @@ namespace LiveActivityApp
 
         [DllImport("user32.dll")]
         static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
+
+        [DllImport("user32.dll")]
+        static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        static extern int GetWindowTextLength(IntPtr hWnd);
 
         private const int SW_SHOW = 5;
         private const int SW_RESTORE = 9;
@@ -162,6 +176,8 @@ namespace LiveActivityApp
 
             var sent = SendInput((uint)inputs.Count, inputs.ToArray(), Marshal.SizeOf(typeof(INPUT)));
             if (sent == inputs.Count) return true;
+            var errCode = Marshal.GetLastWin32Error();
+            Log($"SendInput failed ({sent}/{inputs.Count}) err={errCode}.");
 
             // 2) Fallback: SendKeys literal text for simple ASCII
             // This is a last resort for apps that ignore KEYEVENTF_UNICODE.
@@ -172,8 +188,48 @@ namespace LiveActivityApp
             }
             catch (Exception ex)
             {
-                Log($"Typing fallback failed: {ex.Message}");
+                Log($"SendKeys fallback failed: {ex.Message}");
+            }
+
+            // 3) Clipboard paste fallback (preserves original clipboard if possible)
+            if (TryClipboardPasteFallback(text)) return true;
+
+            return false;
+        }
+
+        private bool TryClipboardPasteFallback(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return true;
+
+            IDataObject? backupData = null;
+            bool hadClipboard = false;
+
+            try
+            {
+                backupData = Clipboard.GetDataObject();
+                hadClipboard = backupData != null;
+            }
+            catch { /* unable to read clipboard; continue */ }
+
+            try
+            {
+                Clipboard.SetText(text, TextDataFormat.UnicodeText);
+                PressCombo(VK_CONTROL, VkFromLetter('V'));
+                Thread.Sleep(30);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log($"Clipboard fallback failed: {ex.Message}");
                 return false;
+            }
+            finally
+            {
+                if (hadClipboard && backupData != null)
+                {
+                    try { Clipboard.SetDataObject(backupData, true); }
+                    catch { /* best effort restore */ }
+                }
             }
         }
 
@@ -909,7 +965,12 @@ namespace LiveActivityApp
                 {
                     // Only include processes with a main window and a non-empty title
                     if (p.MainWindowHandle != IntPtr.Zero && !string.IsNullOrEmpty(p.MainWindowTitle))
-                        cmbWindowTitles.Items.Add(new WindowInfo { Title = p.MainWindowTitle, Handle = p.MainWindowHandle });
+                        cmbWindowTitles.Items.Add(new WindowInfo
+                        {
+                            Title = p.MainWindowTitle,
+                            Handle = p.MainWindowHandle,
+                            ProcessId = (uint)p.Id
+                        });
                 }
             }
             catch (Exception ex)
@@ -990,6 +1051,7 @@ namespace LiveActivityApp
             var token = cb.SelectedItem as string;
             if (string.IsNullOrWhiteSpace(token)) return;
             if (token.Equals("NONE", StringComparison.OrdinalIgnoreCase)) return;
+            if (actions.Exists(a => a.Equals(token, StringComparison.OrdinalIgnoreCase))) return;
             actions.Add(token);
         }
 
@@ -1098,22 +1160,87 @@ namespace LiveActivityApp
         /// Try to re-hydrate/refresh the target window handle right before execution.
         /// 1) Use the existing handle if still valid.
         /// 2) If stale, find a process whose MainWindowTitle matches the stored title.
-        private static IntPtr FindWindowByExactTitle(string title)
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        private static string GetWindowTitleSafe(IntPtr hWnd)
         {
-            foreach (var p in Process.GetProcesses())
+            try
             {
-                try
-                {
-                    if (p.MainWindowHandle != IntPtr.Zero &&
-                        !string.IsNullOrEmpty(p.MainWindowTitle) &&
-                        string.Equals(p.MainWindowTitle, title, StringComparison.Ordinal))
-                    {
-                        return p.MainWindowHandle;
-                    }
-                }
-                catch { /* ignore processes we can't access */ }
+                var length = GetWindowTextLength(hWnd);
+                if (length <= 0) return string.Empty;
+                var sb = new StringBuilder(length + 1);
+                GetWindowText(hWnd, sb, sb.Capacity);
+                return sb.ToString();
             }
-            return IntPtr.Zero;
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static string SimplifyTitle(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title)) return string.Empty;
+            var simplified = Regex.Replace(title.Trim().ToLowerInvariant(), @"\s+", " ");
+            simplified = Regex.Replace(simplified, @"[^a-z0-9 ]", string.Empty);
+            return simplified;
+        }
+
+        private static bool TitleMatches(string original, string candidate)
+        {
+            if (string.IsNullOrWhiteSpace(original) || string.IsNullOrWhiteSpace(candidate)) return false;
+
+            if (string.Equals(original, candidate, StringComparison.Ordinal)) return true;
+            if (string.Equals(original, candidate, StringComparison.OrdinalIgnoreCase)) return true;
+            if (candidate.Contains(original, StringComparison.OrdinalIgnoreCase)) return true;
+            if (original.Contains(candidate, StringComparison.OrdinalIgnoreCase)) return true;
+
+            var simplifiedOriginal = SimplifyTitle(original);
+            var simplifiedCandidate = SimplifyTitle(candidate);
+            return !string.IsNullOrEmpty(simplifiedOriginal)
+                   && simplifiedOriginal == simplifiedCandidate;
+        }
+
+        private static IntPtr FindWindowFallback(WindowInfo info)
+        {
+            if (info == null) return IntPtr.Zero;
+            IntPtr bestMatch = IntPtr.Zero;
+            string? bestMatchTitle = null;
+            uint desiredPid = info.ProcessId;
+            string targetTitle = info.Title ?? string.Empty;
+
+            EnumWindows((hWnd, _) =>
+            {
+                if (!IsWindowVisible(hWnd)) return true;
+                if (!IsWindow(hWnd)) return true;
+
+                uint windowPid = 0;
+                GetWindowThreadProcessId(hWnd, out windowPid);
+
+                var title = GetWindowTitleSafe(hWnd);
+                if (string.IsNullOrWhiteSpace(title)) return true;
+
+                var pidMatches = desiredPid != 0 && windowPid == desiredPid;
+                var titleMatches = TitleMatches(targetTitle, title);
+
+                if (pidMatches || titleMatches)
+                {
+                    bestMatch = hWnd;
+                    bestMatchTitle = title;
+                    if (windowPid != 0) info.ProcessId = windowPid;
+                    // Prefer exact process match; stop enumeration when found
+                    if (pidMatches) return false;
+                }
+
+                return true;
+            }, IntPtr.Zero);
+
+            if (bestMatch != IntPtr.Zero && !string.IsNullOrWhiteSpace(bestMatchTitle))
+            {
+                info.UpdateTitle(bestMatchTitle);
+            }
+
+            return bestMatch;
         }
 
         private IntPtr ResolveHandle(ScheduleEntry entry)
@@ -1124,10 +1251,33 @@ namespace LiveActivityApp
             if (entry.TargetWindow.Handle != IntPtr.Zero && IsWindow(entry.TargetWindow.Handle))
                 return entry.TargetWindow.Handle;
 
-            // Otherwise, try to re-find by exact title.
-            var fresh = FindWindowByExactTitle(entry.TargetWindow.Title ?? "");
-            if (fresh != IntPtr.Zero)
-                entry.TargetWindow.Handle = fresh;
+            // Refresh by process id first if we have one
+            if (entry.TargetWindow.ProcessId != 0)
+            {
+                try
+                {
+                    using var process = Process.GetProcessById((int)entry.TargetWindow.ProcessId);
+                    if (process?.MainWindowHandle != IntPtr.Zero && IsWindow(process.MainWindowHandle))
+                    {
+                        entry.TargetWindow.Handle = process.MainWindowHandle;
+                        entry.TargetWindow.UpdateTitle(process.MainWindowTitle);
+                        return entry.TargetWindow.Handle;
+                    }
+                }
+                catch
+                {
+                    // Process may have exited; fall back to title matching
+                }
+            }
+
+            // Otherwise, attempt to match by fuzzy title/visibility
+            var fallback = FindWindowFallback(entry.TargetWindow);
+            if (fallback != IntPtr.Zero && IsWindow(fallback))
+            {
+                entry.TargetWindow.Handle = fallback;
+                if (string.IsNullOrWhiteSpace(entry.TargetWindow.Title))
+                    entry.TargetWindow.UpdateTitle(GetWindowTitleSafe(fallback));
+            }
 
             return entry.TargetWindow.Handle;
         }
@@ -1183,7 +1333,7 @@ namespace LiveActivityApp
                 AttachThreadInput(currentThread, targetThread, true);
 
                 // Try to bring it forward now
-                if (SetForegroundWindow(hWnd))
+                if (SetForegroundWindow(hWnd) && WaitForForeground(hWnd, TimeSpan.FromMilliseconds(400)))
                     return true;
             }
             finally
@@ -1210,23 +1360,55 @@ namespace LiveActivityApp
 
             // 1) Make sure it's showing
             ShowWindowRestore(hWnd);
-            Thread.Sleep(50);
+            Thread.Sleep(60);
 
-            // 2) Cheap nudge
+            // 2) Direct foreground attempts
+            if (TryRepeatedForeground(hWnd)) return true;
+
+            // 3) Cheap nudge
             AltNudge();
-            if (SetForegroundWindow(hWnd)) return true;
+            if (TryRepeatedForeground(hWnd)) return true;
 
-            // 3) Thread-attach shim
+            // 4) Thread-attach shim
             if (AttachThreadInputFocus(hWnd)) return true;
 
-            // 4) Topmost flick + try again
+            // 5) Topmost flick + retry
             TopMostFlick(hWnd);
-            Thread.Sleep(30);
-            if (SetForegroundWindow(hWnd)) return true;
+            Thread.Sleep(40);
+            if (TryRepeatedForeground(hWnd)) return true;
 
-            // 5) Flash so the user can click if Windows still refuses
+            // 6) Flash so the user can click if Windows still refuses
             FlashOnce(hWnd);
+            return WaitForForeground(hWnd, TimeSpan.FromMilliseconds(250));
+        }
+
+        private bool TryRepeatedForeground(IntPtr hWnd, int attempts = 3)
+        {
+            for (int i = 0; i < attempts; i++)
+            {
+                if (SetForegroundWithWait(hWnd, TimeSpan.FromMilliseconds(350)))
+                    return true;
+                Thread.Sleep(40);
+            }
             return false;
+        }
+
+        private bool SetForegroundWithWait(IntPtr hWnd, TimeSpan waitDuration)
+        {
+            if (!SetForegroundWindow(hWnd)) return false;
+            return WaitForForeground(hWnd, waitDuration);
+        }
+
+        private bool WaitForForeground(IntPtr hWnd, TimeSpan timeout)
+        {
+            if (hWnd == IntPtr.Zero) return false;
+            var sw = Stopwatch.StartNew();
+            while (sw.Elapsed < timeout)
+            {
+                if (GetForegroundWindow() == hWnd) return true;
+                Thread.Sleep(20);
+            }
+            return GetForegroundWindow() == hWnd;
         }
 
 
@@ -1443,6 +1625,14 @@ namespace LiveActivityApp
     {
         public string Title { get; set; } = "";
         public IntPtr Handle { get; set; }
+        public uint ProcessId { get; set; }
+
+        public void UpdateTitle(string? title)
+        {
+            if (!string.IsNullOrWhiteSpace(title))
+                Title = title;
+        }
+
         public override string ToString() => Title;
     }
 }  

@@ -140,7 +140,9 @@ namespace LiveActivityApp
             }
             addIfValid(cbAction1);
             addIfValid(cbAction2);
-            _entry.Actions = actions;
+            _entry.Actions = actions
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             if (double.TryParse((cbDelay.SelectedItem as string) ?? "1", out var d))
                 _entry.ActionDelaySeconds = Math.Max(0, Math.Min(5.0, d));
