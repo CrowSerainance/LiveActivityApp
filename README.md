@@ -1,3 +1,17 @@
+Release notes (v0.1.4)
+Enhance window handling and input reliability
+- Deduplicated actions in `EditScheduleForm.cs` using `Distinct`.
+- Added new P/Invoke declarations for Windows API in `Form1.cs`.
+- Improved error logging for `SendInput` and `SendKeys` fallbacks.
+- Implemented clipboard fallback for text input with restoration.
+- Enhanced window title handling with fuzzy matching and normalization.
+- Replaced exact title matching with robust `FindWindowFallback`.
+- Improved foreground window handling with retries and timeouts.
+- Updated `WindowInfo` to include `ProcessId` and safe title updates.
+- Refined window activation logic for better reliability.
+- Added checks to prevent duplicate actions in `AddActionIfValid`.
+- General improvements to logging and error handling.
+
 Release notes (v0.1.3)
 • Rebuffed Alt+Tab command.
 
